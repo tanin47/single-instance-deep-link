@@ -30,7 +30,9 @@ This library handles the above 3 items for you for *Windows* (currently supporte
 For MacOS, the library is not needed because MacOS supports the above 3 items natively through 
 `java.awt.Desktop.setOpenURIHandler(..)` and `LSMultipleInstancesProhibited` with 
 either `ASWebAuthenticationSession` or `CFBundleURLSchemes`. However, Windows and Linux don't provide similar native approaches.
-That's why we need this library.
+
+On Windows, opening `yourappcustomurischeme://login?authKey=<somekey>` invokes your app with the URL as the first argument.
+Without the library, this would start another instance of your app. This is why the library supports both single-instance enforcement and deep link at the same time.
 
 As a side note, [Electron](https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app) 
 also implements a special logic to support the deep link mechanism on Windows and Linux.
