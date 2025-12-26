@@ -2,3 +2,4 @@
 .idea
 .gradle
 .sock
+.DS_Store

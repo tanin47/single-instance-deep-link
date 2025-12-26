@@ -1,6 +1,4 @@
-package tanin.singleinstanceapp;
-
-import java.util.NoSuchElementException;
+package tanin.singleinstancedeeplink;
 
 public class Base {
   @FunctionalInterface

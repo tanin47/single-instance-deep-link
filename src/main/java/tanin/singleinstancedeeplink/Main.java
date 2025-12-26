@@ -1,7 +1,6 @@
-package tanin.singleinstanceapp;
+package tanin.singleinstancedeeplink;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
@@ -9,11 +8,12 @@ public class Main {
   private static final Logger logger = Logger.getLogger(Main.class.getName());
 
   public static void main(String[] args) throws Exception {
-    SingleInstanceApp.VALIDATE_OS = false;
-    SingleInstanceApp.SOCKET_FILE_DIR = new File(".");
-    SingleInstanceApp.setUp(
+    SingleInstanceDeepLink.VALIDATE_OS = false;
+    SingleInstanceDeepLink.SOCKET_FILE_DIR = new File(".");
+
+    SingleInstanceDeepLink.setUp(
       args,
-      "fingertipai",
+      "singleinstance",
       (anotherInstanceArgs) -> {
         logger.info("Callback was invoked with: " + String.join(" ", anotherInstanceArgs));
       }

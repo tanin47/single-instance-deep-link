@@ -1,7 +1,11 @@
-Enforcing a single instance for Java app (with deep link support)
-------------------------------------------------------------------
+Enforcing a single instance with deep link for Java app 
+---------------------------------------------------------
 
-A zero-external-dependency and lightweight library for enforcing a single instance on a Java app with deep link support i.e. a support for
+[![Sonatype Central](https://maven-badges.sml.io/sonatype-central/io.github.tanin47/single-instance-deep-link/badge.png)](https://central.sonatype.com/artifact/io.github.tanin47/single-instance-deep-link)
+[![Github Actions](https://github.com/tanin47/single-instance-deep-link/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tanin47/single-instance-deep-link/actions/workflows/ci.yml?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/tanin47/single-instance-deep-link/graph/badge.svg?token=M4Q8OGMLPY)](https://codecov.io/gh/tanin47/single-instance-deep-link)
+
+A zero-external-dependency and lightweight Java library for enforcing a single instance on a Java app and supporting deep link i.e. a support for
 custom URI scheme handler e.g. `backdoor://auth?key=1234`. 
 
 
@@ -18,10 +22,10 @@ In a desktop app, we may have a need to authenticate a user through a browser lo
 To authenticate the user securely, your app needs to achieve the followings:
 
 1. Register `yourappcustomurischeme` with the current OS
-2. Be able to receive `yourappcustomurischeme://login?authKey=<somekey>`
+2. Be able to receive `yourappcustomurischeme://login?authKey=<somekey>` (aka deep-linking)
 3. Enforce a single instance of your app. Otherwise, there would be multiple instances to login into.
 
-This library handles the above 3 items for you for *Windows* and *Linux* (coming soon).
+This library handles the above 3 items for you for *Windows* (currently supported) and *Linux* (coming soon).
 
 For MacOS, the library is not needed because MacOS supports the above 3 items natively through 
 `java.awt.Desktop.setOpenURIHandler(..)` and `LSMultipleInstancesProhibited` with 
@@ -40,7 +44,7 @@ Add the dependency to your project:
 ```
 <dependency>
     <groupId>io.github.tanin47</groupId>
-    <artifactId>single-instance-app</artifactId>
+    <artifactId>single-instance-deep-link</artifactId>
     <version>1.0.0</version>
 </dependency>
 ```
@@ -51,9 +55,9 @@ Put the below code in your main method:
 public static void main(String[] args) {
     ... your code ...
     
-    SingleInstanceApp.setUp(
+    SingleInstanceDeepLink.setUp(
       args,
-      "singleinstanceapp", // The custom URI scheme for your app
+      "yourcustomurischeme", // The custom URI scheme for your app
       (anotherInstanceArgs) -> {
         logger.info("Callback was invoked with: " + String.join(" ", anotherInstanceArgs));
       }
@@ -89,6 +93,6 @@ Testing a packaged app is important to ensure it works on a production app.
 
 1. Run `./gradlew jpackage` in order to package the app.
 2. Run the app from the terminal
-3. Open a browser, type `singleinstanceapp://test` in the URL input box, and press enter
+3. Open a browser, type `singleinstance://test` in the URL input box, and press enter
 
-You should see the first app receives `singleinstanceapp://test`.
+You should see the first app receives `singleinstance://test`.

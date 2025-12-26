@@ -1,4 +1,4 @@
-package tanin.singleinstanceapp;
+package tanin.singleinstancedeeplink;
 
 import java.io.*;
 import java.io.ByteArrayInputStream;
@@ -13,8 +13,8 @@ import java.net.StandardProtocolFamily;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SingleInstanceApp {
-  private static final Logger logger = Logger.getLogger(SingleInstanceApp.class.getName());
+public class SingleInstanceDeepLink {
+  private static final Logger logger = Logger.getLogger(SingleInstanceDeepLink.class.getName());
   public interface OnAnotherInstanceActivated {
     void onActivated(String[] args);
   }
@@ -142,7 +142,7 @@ public class SingleInstanceApp {
     });
     loop.setDaemon(true);
     loop.start();
-    Runtime.getRuntime().addShutdownHook(new Thread(SingleInstanceApp::shutdown));
+    Runtime.getRuntime().addShutdownHook(new Thread(SingleInstanceDeepLink::shutdown));
     logger.info("This is the first instance. The socket server is accepting incoming connections...");
     return Operation.SHOULD_CONTINUE;
   }
