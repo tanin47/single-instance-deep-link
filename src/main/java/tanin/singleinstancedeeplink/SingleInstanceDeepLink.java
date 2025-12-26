@@ -54,14 +54,13 @@ public class SingleInstanceDeepLink {
       }
     }
 
-    var result = setupSocketOrCommunicate(args, onAnotherInstanceActivated, 2);
+    var result = setupSocketOrCommunicate(args, uriScheme, onAnotherInstanceActivated, 2);
 
     if (result == Operation.SHOULD_EXIT) {
       System.exit(0);
     }
 
-    var processHandle = ProcessHandle.current();
-    var commandPath = processHandle.info().command();
+    var commandPath = ProcessHandle.current().info().command();
 
     if (commandPath.isPresent()) {
       logger.info("The current executable path is: " + commandPath.get());
@@ -127,6 +126,7 @@ public class SingleInstanceDeepLink {
 
   static Operation setupSocketOrCommunicate(
     String[] args,
+    String socketFilenamePrefix,
     OnAnotherInstanceActivated onAnotherInstanceActivated,
     int retryCount
   ) throws Exception {
@@ -140,7 +140,11 @@ public class SingleInstanceDeepLink {
       }
     }
 
-    var socketPath = SOCKET_FILE_DIR.toPath().resolve("single.sock").toFile();
+    var socketFilename = socketFilenamePrefix + ".sock";
+
+    assert SOCKET_FILE_DIR != null;
+    var socketPath = SOCKET_FILE_DIR.toPath().resolve(socketFilename).toFile();
+    logger.info("Acquiring the socket at: " + socketPath.getCanonicalPath());
     var socketAddress = UnixDomainSocketAddress.of(socketPath.toPath());
 
     serverSocket = ServerSocketChannel.open(StandardProtocolFamily.UNIX);
@@ -169,7 +173,7 @@ public class SingleInstanceDeepLink {
         if (retryCount > 0) {
           logger.warning("The socket is stale. Deleting " + socketPath.getCanonicalPath() + " and retrying...");
           var _ignored = socketPath.delete();
-          return setupSocketOrCommunicate(args, onAnotherInstanceActivated, retryCount - 1);
+          return setupSocketOrCommunicate(args, socketFilenamePrefix, onAnotherInstanceActivated, retryCount - 1);
         } else {
           logger.log(Level.SEVERE, "Unable to neither open nor connect to the socket at: " + socketPath.getCanonicalPath() + ". Please delete the socket file and try again.", errorConnectingSocket);
           throw errorConnectingSocket;

@@ -13,10 +13,12 @@ public class MultipleInstancesTest extends Base {
   @Test
   void secondInstanceStop() throws Exception {
     SingleInstanceDeepLink.SOCKET_FILE_DIR = Files.createTempDirectory("s").toFile();
+    var socketFilenamePrefix = "single";
     AtomicReference<String[]> invokedArgsFromFirst = new AtomicReference<>();
 
     var firstResult = SingleInstanceDeepLink.setupSocketOrCommunicate(
       new String[] {"first"},
+      socketFilenamePrefix,
       invokedArgsFromFirst::set,
       2
     );
@@ -26,6 +28,7 @@ public class MultipleInstancesTest extends Base {
     AtomicReference<String[]> invokedArgsFromSecond = new AtomicReference<>();
     var secondResult = SingleInstanceDeepLink.setupSocketOrCommunicate(
       new String[] {"second", "something"},
+      socketFilenamePrefix,
       invokedArgsFromSecond::set,
       2
     );
