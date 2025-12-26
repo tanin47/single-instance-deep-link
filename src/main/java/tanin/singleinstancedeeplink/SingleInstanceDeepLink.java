@@ -10,6 +10,7 @@ import java.nio.channels.NotYetBoundException;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.net.StandardProtocolFamily;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,34 +32,96 @@ public class SingleInstanceDeepLink {
 
   public static File SOCKET_FILE_DIR = null;
   public static boolean VALIDATE_OS = true;
+  public static String OS = System.getProperty("os.name").toLowerCase();
 
   public static void setUp(
     String[] args,
     String uriScheme,
+    String appName,
     OnAnotherInstanceActivated onAnotherInstanceActivated
   ) throws Exception {
     if (VALIDATE_OS) {
-      String os = System.getProperty("os.name").toLowerCase();
-
-      if (os.contains("mac")) {
+      if (OS.contains("mac")) {
         throw new UnsupportedOperationException(
           "MacOS is not supported. For Mac, please use java.awt.Desktop.setOpenURIHandler(..) and Info.plist's LSMultipleInstancesProhibited with either ASWebAuthenticationSession or Info.plist's CFBundleURLSchemes."
         );
       }
 
-      if (!os.contains("win")) {
+      if (!OS.contains("win")) {
         throw new UnsupportedOperationException(
           "Only Windows is supported."
         );
       }
     }
 
-    // TODO: Register uriScheme using regedit
-
     var result = setupSocketOrCommunicate(args, onAnotherInstanceActivated, 2);
 
     if (result == Operation.SHOULD_EXIT) {
       System.exit(0);
+    }
+
+    var processHandle = ProcessHandle.current();
+    var commandPath = processHandle.info().command();
+
+    if (commandPath.isPresent()) {
+      logger.info("The current executable path is: " + commandPath.get());
+      var prefix = "HKCU\\SOFTWARE\\Classes\\" + uriScheme;
+      addRegistry(prefix);
+      addRegistry(prefix, "", appName);
+      addRegistry(prefix, "URL Protocol", "");
+      addRegistry(prefix + "\\shell");
+      addRegistry(prefix + "\\shell\\open");
+      addRegistry(prefix + "\\shell\\open\\command");
+      addRegistry(prefix + "\\shell\\open\\command", "", "\\\"" + commandPath.get() + "\\\" \\\"%1\\\"");
+
+    } else {
+      logger.info("Could not determine the executable path. The registry keys are not set.");
+    }
+  }
+
+  private static void addRegistry(String path) throws IOException, InterruptedException {
+    runCmd(new String[] {"reg", "add", path, "/f"});
+  }
+
+  private static void addRegistry(String path, String key, String value) throws IOException, InterruptedException {
+    var args = new ArrayList<String>();
+    args.add("reg");
+    args.add("add");
+    args.add(path);
+
+    if (key.isEmpty()) {
+      args.add("/ve");
+    } else {
+      args.add("/v");
+      args.add(key);
+    }
+
+    if (!value.isEmpty()) {
+      args.add("/d");
+      args.add(value);
+    }
+    args.add("/f");
+    runCmd(args.toArray(String[]::new));
+  }
+
+  private static void runCmd(String[] cmds) throws IOException, InterruptedException {
+    logger.info("Run cmd: " + String.join(" ", cmds));
+    var process = Runtime.getRuntime().exec(cmds);
+
+    try (BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+         BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+
+      String line;
+      while ((line = stdInput.readLine()) != null) {
+        logger.info("stdout: " + line);
+      }
+      while ((line = stdError.readLine()) != null) {
+        logger.warning("stderr: " + line);
+      }
+    }
+
+    if (process.waitFor() != 0) {
+      throw new RuntimeException("Failed to add registry key");
     }
   }
 
@@ -68,7 +131,13 @@ public class SingleInstanceDeepLink {
     int retryCount
   ) throws Exception {
     if (SOCKET_FILE_DIR == null) {
-      SOCKET_FILE_DIR = new File(System.getenv("LOCALAPPDATA"));
+      if (OS.contains("win")) {
+        SOCKET_FILE_DIR = new File(System.getenv("LOCALAPPDATA"));
+      } else if (OS.contains("mac")) {
+        SOCKET_FILE_DIR = new File(".");
+      } else if (OS.contains("nux")) {
+        throw new UnsupportedOperationException("Linux is not supported.");
+      }
     }
 
     var socketPath = SOCKET_FILE_DIR.toPath().resolve("single.sock").toFile();

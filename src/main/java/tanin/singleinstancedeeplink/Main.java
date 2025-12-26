@@ -9,11 +9,11 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     SingleInstanceDeepLink.VALIDATE_OS = false;
-    SingleInstanceDeepLink.SOCKET_FILE_DIR = new File(".");
 
     SingleInstanceDeepLink.setUp(
       args,
       "singleinstance",
+      "Single Instance Deep Link Test App",
       (anotherInstanceArgs) -> {
         logger.info("Callback was invoked with: " + String.join(" ", anotherInstanceArgs));
       }

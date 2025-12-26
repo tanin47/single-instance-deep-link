@@ -25,7 +25,7 @@ val currentOS = when {
 
 group = "tanin.singleinstancedeeplink"
 version = "1.0"
-val appName = "Single Instance with Deep Link test app"
+val appName = "single-instance-deep-link-test"
 
 java {
     toolchain {
@@ -252,19 +252,6 @@ tasks.register("jpackage") {
     outputDir.get().asFile.deleteRecursively()
 
     doLast {
-        // -XstartOnFirstThread is required for MacOS
-        val maybeStartOnFirstThread = if (currentOS == OS.MAC) {
-            "-XstartOnFirstThread"
-        } else {
-            ""
-        }
-
-        val javaOptionsArg = listOf(
-            "--java-options",
-            // -Djava.library.path=$APPDIR/resources is needed because we put the needed dylibs, jnilibs, and dlls there.
-            "$maybeStartOnFirstThread -Dbackdoor.packaged=true -Djava.library.path=\$APPDIR/resources --add-exports java.base/sun.security.x509=ALL-UNNAMED --add-exports java.base/sun.security.tools.keytool=ALL-UNNAMED"
-        )
-
         val baseArgs = listOf(
             "--name", appName,
             "--app-version", version.toString(),
@@ -275,7 +262,7 @@ tasks.register("jpackage") {
             "--dest", outputDir.get().asFile.absolutePath,
             "--vendor", "Tanin Na Nakorn",
             "--copyright", "2025 Tanin Na Nakorn",
-        ) + javaOptionsArg
+        )
 
         val platformSpecificArgs = if (currentOS == OS.MAC) {
             listOf(
@@ -285,7 +272,6 @@ tasks.register("jpackage") {
             )
         } else if (currentOS == OS.WINDOWS) {
             listOf(
-                "--icon", layout.projectDirectory.dir("win-resources").file("Backdoor.ico").asFile.absolutePath,
                 "--type", "msi",
                 "--win-menu",
                 "--win-shortcut"
