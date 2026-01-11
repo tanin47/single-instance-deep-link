@@ -24,7 +24,7 @@ val currentOS = when {
 }
 
 group = "tanin.singleinstancedeeplink"
-version = "0.1.2"
+version = "1.0.0"
 val appName = "single-instance-deep-link-test"
 
 java {
@@ -281,5 +281,12 @@ tasks.register("jpackage") {
         }
 
         runCmd(*((listOf(jpackageBin.absolutePathString()) + baseArgs + platformSpecificArgs).toTypedArray()))
+    }
+}
+
+// For CI validation.
+tasks.register("printVersion") {
+    doLast {
+        print("$version")
     }
 }
