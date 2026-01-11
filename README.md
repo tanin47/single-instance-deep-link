@@ -47,7 +47,7 @@ Add the dependency to your project:
 <dependency>
     <groupId>io.github.tanin47</groupId>
     <artifactId>single-instance-deep-link</artifactId>
-    <version>1.0.0</version>
+    <version>1.0</version>
 </dependency>
 ```
 
@@ -60,6 +60,7 @@ public static void main(String[] args) {
     SingleInstanceDeepLink.setUp(
       args,
       "yourcustomurischeme", // The custom URI scheme for your app
+      "Your App Name", // Your app name which will be shown to the user on a browser.
       (anotherInstanceArgs) -> {
         logger.info("Callback was invoked with: " + String.join(" ", anotherInstanceArgs));
       }
