@@ -35,7 +35,7 @@ On Windows, opening `yourappcustomurischeme://login?authKey=<somekey>` invokes y
 Without the library, this would start another instance of your app. This is why the library supports both single-instance enforcement and deep link at the same time.
 
 As a side note, [Electron](https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app) 
-also implements a special logic to support the deep link mechanism on Windows and Linux.
+also implements a similar mechanism to support the deep link mechanism on Windows and Linux.
 
 
 How to use
